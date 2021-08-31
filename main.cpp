@@ -12,7 +12,19 @@ int main() {
     udmm.run();
     udmm.print();
 
-    //bitShow( rotr(0x7fff,3) );
+    /* spliting u64 into 2 u32 arrays
+    u64 x = 12345678912345;
+    u32 y[2];
+
+    y[0]= x>>32;
+    y[1] = x;
+
+    bitShow( x );
+    bitShow( y[0] );
+    bitShow( y[1] );
+    bitShow( ((u64)y[0]<<32)+y[1] );
+    /**/
+
     //bitShow( rotl(0x7fff,1) );
 
     return 0;

@@ -21,7 +21,7 @@ class sha1 {
         u32 words[16];
     } message;
 
-    u32 getWord(u8 i){
+    u32 callWord(u8 i){
 #if BYTE_ORDER == LITTLE_ENDIAN
         return (rotl(message.words[i],24 ) & 0xFF00FF00) | (rotl(message.words[i],8) & 0x00FF00FF);
 #elif BYTE_ORDER == BIG_ENDIAN
