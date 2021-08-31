@@ -3,9 +3,10 @@
 
 #include <utility>
 #include <vector>
+#include <sstream>
 #include "bit_tools.h"
 
-class SHA1 {
+class sha1 {
 
     u32 h0 = 0x67452301;
     u32 h1 = 0xEFCDAB89;
@@ -15,12 +16,34 @@ class SHA1 {
 
     u64 ml = 0; // message length
 
-    std::vector<u32> message, words;
+    union {
+        u8 bytes[64];
+        u32 words[16];
+    } message;
+
+    u32 getWord(u8 i){
+#if BYTE_ORDER == LITTLE_ENDIAN
+        return (rotl(message.words[i],24 ) & 0xFF00FF00) | (rotl(message.words[i],8) & 0x00FF00FF);
+#elif BYTE_ORDER == BIG_ENDIAN
+        return message.words[i];
+#else
+#error "Endianness not defined!"
+#endif
+    }
 
 public:
-    explicit SHA1(std::vector<u32> input) : message(std::move(input)) {}
+    sha1(std::string input){
+        for(u8 i =0;i<16; i++) message.words[i] &= 0;
+        std::copy(input.begin(), input.end(), message.bytes);
+        //for(int i =0;i<64; i++) std::cout << i << ": " << (int)message.bytes[i] << '\n';
+    }
+    sha1(std::vector<u8> input) {
+        for(u8 i =0;i<16; i++) message.words[i] &= 0;
+        std::copy(input.begin(), input.end(), message.bytes);
+        //for(int i =0;i<64; i++) std::cout << i << ": " << (int)message.bytes[i] << '\n';
+    }
     void run();
-    void print();
+    void print() const;
 
 };
 

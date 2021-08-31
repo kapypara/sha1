@@ -1,31 +1,39 @@
 #include "sha1.h"
 
 
-void SHA1::print() {
+void sha1::print() const {
 
     std::cout << std::hex << h0 << h1 << h2 << h3 << h4 << '\n';
 }
 
-void SHA1::run() {
-    words.push_back( ('a'<<24) + ('b'<<16) + ('c'<<8) + (1<<7) );
-    //bitShow(words[0]);
-    words.insert(words.begin()+1,14,0);
-    words.push_back(24);
-    words.insert(words.end(),64,0);
+inline u32 Ch(u32 x, u32 y, u32 z){
+    return (x & y) ^ (~x & z);
+}
 
-    for(u8 i=16; i<80; i++){
-        //if (i== 65) std::cout << words[i-3] << ' ' <<  words[i-8] << ' ' << words[i-14] << ' ' << words[i-16] << '\n';
-        words[i] = (words[i-3] xor words[i-8] xor words[i-14] xor words[i-16]);
-        //bitShow(words[i]);
-        words[i] = rotl(words[i],1);
-        //bitShow(words[i]);
-    }
-    /*
-    for(u8 i=0;i<80; i++){
-        std::cout << (int)i << ": " << words[i] << '\n';
+inline u32 Parity(u32 x, u32 y, u32 z){
+    return x ^ y ^ z;
+}
+
+inline u32 Maj(u32 x, u32 y, u32 z){
+    return (x & y) ^ (x & z) ^ (y & z);
+}
+
+void sha1::run() {
+
+    u32 * word = message.words;
+
+    message.bytes[3] = 0x80 ;
+    message.bytes[63] = 24 ;
+
+    //bitShow( getWord(0) );
+
+
+    for(u8 i=0;i<16; i++){
+        std::cout << (int)i << ": " << getWord(i) << '\n';
+        bitShow(getWord(i) );
     }
     std::cout << "words are done!\n";
-    */
+    /**/
 
     u32 a = h0;
     u32 b = h1;
@@ -33,35 +41,51 @@ void SHA1::run() {
     u32 d = h3;
     u32 e = h4;
 
-    u32 f,k, temp;
+    u32 f,k, temp, Ws;
 
     //u8 i = 0;
     for(u8 i=0; i<80; i++){
         if (i < 20){
-            f = (b & c) ^ (~b & d);
+            f = Ch(b,c,d);
             k = 0x5A827999;
         } else if (i < 40){
-            f = b ^ c ^ d;
+            f = Parity(b,c,d);
             k = 0x6ED9EBA1;
         } else if (i < 60){
-            f = (b & c) ^ (b & d) ^ (c & d) ;
+            f = Maj(b,c,d);
             k = 0x8F1BBCDC;
         } else if (i >= 60){
-            f = b ^ c ^ d;
+            f = Parity(b,c,d);
             k = 0xCA62C1D6;
         }
 
-        temp = rotl(a,5) + f + e + k + words[i];
+
+        if(i < 16){
+            word[i] = getWord(i);
+            temp = rotl(a,5) + f + e + k + word[i];
+        } else {
+            u8 s = i & 0xf; // mask for values above 16
+
+            word[s] = word[ (s+13) & 0xf ] ^ word[ (s+8) & 0xf ] ^ word[ (s+2) & 0xf ] ^ word[s];
+            word[s] = rotl( word[s], 1);
+            temp = rotl(a,5) + f + e + k + word[s];
+        }
+
+        if(i==19){
+            bitShow( temp );
+            bitShow( 0xfd9e1d7d );
+        }
+
         e = d;
         d = c;
         c = rotl(b,30);
         b = a;
         a = temp;
 
-        /*
+
         std::cout << std::dec << "t" << (int)i << std::hex <<
             " a: " << a << ", b: " << b << ", c: " << c << ", d: " << d << ", e: " << e << '\n';
-        /**/
+
     }
 
 
