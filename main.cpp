@@ -6,11 +6,12 @@
 
 int main() {
 
-    std::string var_1 = "abc";
+    char var_1[] = { 'a', 'b', 'c' };
+    char *var_2;
+
     //bitShow(var_1[0]);
-    sha1 udmm(var_1);
-    udmm.run();
-    udmm.print();
+    sha1 udmm(var_1, sizeof(var_1)/sizeof(var_1[0]));
+    sha1 udmm2(var_2, 0);
 
     /* spliting u64 into 2 u32 arrays
     u64 x = 12345678912345;

@@ -46,20 +46,21 @@ u32 get_temp(u32 *w, const u8 i, const u32 a, const u32 e, const u32 f, const u3
     return rotl(a,5) + f + e + k + w[s];
 }
 
-void sha1::run() {
+void sha1::process(u8 chunk[64]) {
 
-    u32 * word = message.words;
 
-    message.bytes[3] = 0x80 ;
-    message.bytes[63] = 24 ;
+    u32 * word = (u32*)chunk;
+
+    // make sure words are in big ENDIAN
+    for(u8 i=0; i<16; i++) word[i] = callWord(word[i]);
 
     //bitShow( callWord(0) );
 
 
-    /*
+    //*
     for(u8 t=0;t<16; t++){
-        std::cout << (int)t << ": " << getWord(t) << '\n';
-        bitShow(callWord(t) );
+        std::cout << std::dec << (int)t << ": " << std::hex << word[t] << '\n';
+        bitShow( word[t] );
     }
     std::cout << "words are done!\n";
     /**/
@@ -75,8 +76,6 @@ void sha1::run() {
 
     u8 t = 0;
 
-    // make sure words a in big ENDIAN
-    for(u8 i=0; i<16; i++) word[i] = callWord(i);
 
     k = 0x5A827999;
     for(; t < 16; t++){
