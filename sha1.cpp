@@ -6,6 +6,16 @@ void sha1::print() const {
     std::cout << std::hex << h0 << h1 << h2 << h3 << h4 << '\n';
 }
 
+u32 sha1::callWord(u32 word){
+#if BYTE_ORDER == LITTLE_ENDIAN
+    return (rotl(word,24 ) & 0xFF00FF00) | (rotl(word,8) & 0x00FF00FF);
+#elif BYTE_ORDER == BIG_ENDIAN
+    return word;
+#else
+#error "Endianness not defined!"
+#endif
+}
+
 void sha1::putBitCountAtTheEnd(){
     buffer.words[14] = ml>>32 ;
     buffer.words[15] = ml ;
@@ -62,7 +72,7 @@ void sha1::process(u8 chunk[64]) {
     //showBits( callWord(0) );
 
 
-    //*
+    /*
     std::cout << "[ sha1::process ] listing words!, data in hex\n";
     for(u8 t=0;t<16; t++){
         std::cout << std::dec << 't' << (int)t << ": " << std::hex << word[t] << std::dec << '\n';
