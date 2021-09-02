@@ -21,6 +21,6 @@ u32 rotr(u32 word, u16 amount);
 u32 rotl(u32 word, u16 amount);
 
 // show bits for debugging
-void bitShow(u64 bits);
+void showBits(u64 bits);
 
 #endif //MY_SHA1_BIT_TOOLS_H

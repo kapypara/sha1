@@ -21,7 +21,7 @@ u32 rotl(const u32 word, const u16 amount)  {
     return word;
 }
 
-void bitShow(u64 bits){
+void showBits(u64 bits){
     const u16 bit_count = countBits(u64) - 1;
 
     //std::cout << "byte count: " << bit_count << '\n';

@@ -6,6 +6,11 @@ void sha1::print() const {
     std::cout << std::hex << h0 << h1 << h2 << h3 << h4 << '\n';
 }
 
+void sha1::putBitCountAtTheEnd(){
+    buffer.words[14] = ml>>32 ;
+    buffer.words[15] = ml ;
+}
+
 inline u32 Ch(u32 x, u32 y, u32 z){
     return (x & y) ^ (~x & z);
 }
@@ -52,17 +57,18 @@ void sha1::process(u8 chunk[64]) {
     u32 * word = (u32*)chunk;
 
     // make sure words are in big ENDIAN
-    for(u8 i=0; i<16; i++) word[i] = callWord(word[i]);
+    //for(u8 i=0; i<16; i++) word[i] = callWord(word[i]);
 
-    //bitShow( callWord(0) );
+    //showBits( callWord(0) );
 
 
     //*
+    std::cout << "[ sha1::process ] listing words!, data in hex\n";
     for(u8 t=0;t<16; t++){
-        std::cout << std::dec << (int)t << ": " << std::hex << word[t] << '\n';
-        bitShow( word[t] );
+        std::cout << std::dec << 't' << (int)t << ": " << std::hex << word[t] << std::dec << '\n';
+        showBits(word[t]);
     }
-    std::cout << "words are done!\n";
+    std::cout << "[ sha1::process ] done listing words!\n";
     /**/
 
 

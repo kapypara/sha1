@@ -34,58 +34,98 @@ class sha1 {
 #endif
     }
 
+    void putBitCountAtTheEnd();
+
 public:
     void process(u8 chunk[64]);
     void print() const;
 
+
     sha1(const char * str, u64 length){
 
-        /*
-        for(u8 i=0; i<3; i++) buffer.bytes[i] = str[i];
+        u64 byte_left, byte_passed;
 
-        buffer.bytes[3] = 0x80 ;
-
-        //for(u8 i = 3+1; i< 62; i++) buffer->bytes[i] = 0;
-
-        buffer.bytes[62] =  0;
-        buffer.bytes[63] = 24;
-
-
-        process(buffer.bytes);
-        print();
-        /**/
-        //*
-
-        u64 byte_passed, byte_left;
-
-        byte_passed = 0;
         byte_left = length;
+        //std::cout << "[ SHA1 constructor ]: byte_left before loop " << std::dec << byte_left << '\n';
 
         do {
+            byte_passed = ml>>3;
 
-            for(u8 i=0; i<byte_left; i++) buffer.bytes[i] = str[i];
+            memcpy(&buffer.bytes, (str + byte_passed), 64);
+            /*
+            std::cout << (char)buffer.bytes[0] << '\n';
+            std::cout << (char)buffer.bytes[1] << '\n';
+            std::cout << (char)buffer.bytes[2] << '\n';
+            /*
+            for(u64 i=0; i<length; i++) {
+                buffer.bytes[i] = str[i+byte_passed];
+            }
+             */
 
-            if( byte_left < 64 ){
+            if( byte_left > 64 ) {
+                std::cout << "[ consturct ] >64\n";
 
-                byte_passed = byte_left;
-                ml += (byte_passed)<<3; // shifting by 3 instead of multiplying by 8
+                byte_left -= 64;
+                ml += 512;
+                //std::cout << "[ SHA1 constructor ]: ml is now " << std::dec << ml << '\n';
 
+                // make sure words are in big ENDIAN
+                for(u8 i=0; i<16; i++) buffer.words[i] = callWord(buffer.words[i]);
+
+            } else if( byte_left == 64) {
+                std::cout << "[ consturct ] ==64\n";
+
+                ml += 512;
+                byte_left = 0;
+
+                for(u8 i=0; i<16; i++) buffer.words[i] = callWord(buffer.words[i]);
+                process(buffer.bytes);
+
+                buffer.words[0] = 0x80000000; // 1 at the beginning of the first word
+                for(u8 i=1; i<14; i++) buffer.words[i] = 0;
+                putBitCountAtTheEnd();
+
+            } else if (byte_left >55){
+                std::cout << "[ consturct ] ==64\n";
+
+                ml += (byte_left<<3);
+
+                std::cout << "[ padding ]: added 0x80 at " << std::dec << byte_left+1 << '\n';
                 buffer.bytes[byte_left] = 0x80 ;
 
-                for(u8 i = byte_left+1; i< 62; i++) buffer.bytes[i] = 0;
+                for(u8 i = byte_left+1; i< 64; i++) buffer.bytes[i] = 0;
 
-                buffer.bytes[62] = ml>>32 ;
-                buffer.bytes[63] = ml ;
-            } else {
-                byte_passed = 512;
-                ml += byte_passed<<3;
+                for(u8 i=0; i<16; i++) buffer.words[i] = callWord(buffer.words[i]);
+                process(buffer.bytes);
+
+                for(u8 i=0; i<14; i++) buffer.words[i] = 0;
+                putBitCountAtTheEnd();
+
+                byte_left = 0;
+
+            } else{
+                std::cout << "[ consturct ] else\n";
+
+                ml += (byte_left<<3); // shifting by 3 instead of multiplying by 8
+
+                std::cout << "[ padding ]: added 0x80 at " << std::dec << byte_left+1 << '\n';
+                buffer.bytes[byte_left] = 0x80 ;
+
+                for(u8 i = byte_left+1; i< 56; i++) buffer.bytes[i] = 0;
+
+                putBitCountAtTheEnd();
+
+
+                // make sure only the first 14 words are in big ENDIAN
+                for(u8 i=0; i<14; i++) buffer.words[i] = callWord(buffer.words[i]);
+
+                byte_left = 0;
+
             }
-
 
             process(buffer.bytes);
 
-            byte_left -= byte_passed;
-
+            //std::cout << "[ SHA1 constructor ]: byteleft" << byte_left << '\n';
         } while(byte_left>0);
 
         print();
