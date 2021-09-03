@@ -1,12 +1,38 @@
 #include "sha1.h"
 
+char *sha1(char *out, const char *str, const u64 length){
+    SHA1 hash;
 
-void sha1::print() const {
+    hash.update(str, length);
+    //hash.print();
 
-    std::cout << std::hex << h0 << h1 << h2 << h3 << h4 << '\n';
+    hash.output(out);
 }
 
-u32 sha1::callWord(u32 word){
+inline void wordToChar(char *str, u8 offset, u32 word){
+
+    sprintf(str+offset,  "%c%c%c%c", (u8)(word>>24), (u8)(word>>16), (u8)(word>>8), (u8)(word)  );
+}
+
+void SHA1::output(char *out) const{
+
+    wordToChar(out, 0,  h0);
+    wordToChar(out, 4,  h1);
+    wordToChar(out, 8,  h2);
+    wordToChar(out, 12, h3);
+    wordToChar(out, 16, h4);
+
+    out[20] = '\0';
+
+}
+
+void SHA1::print() const {
+
+    //std::cout << std::hex << h0 << h1 << h2 << h3 << h4 << '\n';
+    std::printf("%08x%08x%08x%08x%08x\n",h0,h1,h2,h3,h4);
+}
+
+u32 SHA1::callWord(u32 word){
 #if BYTE_ORDER == LITTLE_ENDIAN
     return (rotl(word,24 ) & 0xFF00FF00) | (rotl(word,8) & 0x00FF00FF);
 #elif BYTE_ORDER == BIG_ENDIAN
@@ -16,7 +42,7 @@ u32 sha1::callWord(u32 word){
 #endif
 }
 
-void sha1::putBitCountAtTheEnd(){
+void SHA1::putBitCountAtTheEnd(){
     buffer.words[14] = ml>>32 ;
     buffer.words[15] = ml ;
 }
@@ -61,7 +87,7 @@ u32 get_temp(u32 *w, const u8 i, const u32 a, const u32 e, const u32 f, const u3
     return rotl(a,5) + f + e + k + w[s];
 }
 
-void sha1::process(u8 chunk[64]) {
+void SHA1::process(u8 chunk[64]) {
 
 
     u32 * word = (u32*)chunk;
@@ -73,12 +99,12 @@ void sha1::process(u8 chunk[64]) {
 
 
     /*
-    std::cout << "[ sha1::process ] listing words!, data in hex\n";
+    std::cout << "[ SHA1::process ] listing words!, data in hex\n";
     for(u8 t=0;t<16; t++){
         std::cout << std::dec << 't' << (int)t << ": " << std::hex << word[t] << std::dec << '\n';
         showBits(word[t]);
     }
-    std::cout << "[ sha1::process ] done listing words!\n";
+    std::cout << "[ SHA1::process ] done listing words!\n";
     /**/
 
 
@@ -136,4 +162,70 @@ void sha1::process(u8 chunk[64]) {
     h2 += c;
     h3 += d;
     h4 += e;
+}
+
+void SHA1::update(const char * str, u64 length){
+
+    u64 byte_left, byte_passed;
+
+    byte_left = length;
+
+    do {
+        byte_passed = ml>>3; // just for readability, only used in memcpy()
+
+        memcpy(&buffer.bytes, (str + byte_passed), upto64(byte_left) );
+
+        if( byte_left > 64 ) {
+
+            byte_left -= 64;
+            ml += 512;
+
+            for(u8 i=0; i<16; i++) buffer.words[i] = callWord(buffer.words[i]);
+
+        } else if( byte_left == 64) {
+
+            ml += 512;
+            byte_left = 0;
+
+            for(u8 i=0; i<16; i++) buffer.words[i] = callWord(buffer.words[i]);
+            process(buffer.bytes);
+
+            buffer.words[0] = 0x80000000; // 1 at the beginning of the first word
+            for(u8 i=1; i<14; i++) buffer.words[i] = 0;
+            putBitCountAtTheEnd();
+
+        } else if (byte_left >55) {
+
+            ml += (byte_left<<3);
+
+            buffer.bytes[byte_left] = 0x80 ;
+            for(u8 i = byte_left+1; i< 64; i++) buffer.bytes[i] = 0;
+
+            for(u8 i=0; i<16; i++) buffer.words[i] = callWord(buffer.words[i]);
+            process(buffer.bytes);
+
+            for(u8 i=0; i<14; i++) buffer.words[i] = 0;
+            putBitCountAtTheEnd();
+
+            byte_left = 0;
+
+        } else {
+
+            ml += (byte_left<<3); // shifting by 3 instead of multiplying by 8
+
+            buffer.bytes[byte_left] = 0x80 ;
+            for(u8 i = byte_left+1; i< 56; i++) buffer.bytes[i] = 0;
+
+            for(u8 i=0; i<14; i++) buffer.words[i] = callWord(buffer.words[i]);
+            putBitCountAtTheEnd();
+
+            byte_left = 0;
+
+        }
+
+        process(buffer.bytes);
+
+    } while(byte_left>0);
+
+    //print();
 }
