@@ -3,17 +3,16 @@
 #include "bit_tools.h"
 #include "sha1.h"
 
-#define length(x) (sizeof(x)/sizeof(x[0])-1)
-bool test(char *x, char *y){
+bool test(const char *x, const char *y, const u8 num){
 
     if( !strcmp(x,y) ){
-        std::cout << "test passed\n";
+        std::cout << "test: " << (int)num << " passed\n";
         std::cout << x <<'\n';
         std::cout << y <<"\n\n";
         return true;
 
     } else {
-        std::cout << "test failed\n";
+        std::cout << "test: " << (int)num << " failed\n";
         std::cout << x <<'\n';
         std::cout << y <<"\n\n";
         return false;
@@ -21,7 +20,7 @@ bool test(char *x, char *y){
     }
 }
 
-inline void hex_hash_To_hex_char(const char *hash, char *str){
+inline void digest_to_hex_string(const char *hash, char *str){
 
     for(u8 i = 0; i < 20; i++) {
         sprintf( str+(i*2), "%02x", hash[i]&0xff);
@@ -29,24 +28,35 @@ inline void hex_hash_To_hex_char(const char *hash, char *str){
     str[40] = '\0';
 }
 
+void test_hashing(const char *hash, const char *data_to_hash, const u64 data_length, const u8 test_num){
+
+    char digested[21];
+    char hex_string[41];
+
+    sha1(digested, data_to_hash, data_length);
+
+    digest_to_hex_string(digested, hex_string);
+
+    test( hash, hex_string, test_num);
+}
+
 int main() {
 
-    //char *hash = sha1((char *) "abc", 3);
+    // test 1
+    const char string_abc[] = "abc"; // a9993e364706816aba3e25717850c26c9cd0d89d
+    test_hashing("a9993e364706816aba3e25717850c26c9cd0d89d", string_abc, strlen(string_abc), 1);
 
-    //std::printf("%s\n",hash);
 
-    char want[] = "906c542ab5d4a13c0df66f505bfbcc3fd95044d0";
+    // test 2
+    const char string_empty[] = ""; // da39a3ee5e6b4b0d3255bfef95601890afd80709
+    test_hashing("da39a3ee5e6b4b0d3255bfef95601890afd80709", string_empty, strlen(string_empty), 2);
 
-    char tobehashed[] = "stuff123456stuff123456123456stuff123456123456stuff1234456333334";
-    char hexhash[21];
-    char digested[41];
 
-    sha1(hexhash, tobehashed, strlen(tobehashed));
+    // test 3
+    const char string_random[] = "stuff123456stuff123456123456stuff123456123456stuff1234456333334";
+    test_hashing("906c542ab5d4a13c0df66f505bfbcc3fd95044d0", string_random, strlen(string_random), 3);
 
-    hex_hash_To_hex_char(hexhash, digested);
-
-    test( want, digested );
-
+    // test 4
     char const string1[] = "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghij";
     char const string2[] = "klmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu";
     char expect[] = "a49b2446a02c645bf419f995b67091253a04a259";
@@ -58,40 +68,25 @@ int main() {
     hash.update(string2, strlen(string2));
     hash.output(result);
 
-    hex_hash_To_hex_char(result, hexresult);
+    digest_to_hex_string(result, hexresult);
 
-    test( expect, hexresult );
+    test( expect, hexresult, 4 );
 
-    /*
-    char var_1[] = "abc"; // a9993e364706816aba3e25717850c26c9cd0d89d
-    char *var_2; // da39a3ee5e6b4b0d3255bfef95601890afd80709
-    char var_3[] = "stuff123456stuff123456123456stuff123456123456stuff1234456333334";
-    char var_4[] = "abcdbcdecdefdefgefghfghighihijkijkljklmklmnlmnonopnop123321222111";
 
-    SHA1 udmm(var_1, length(var_1));
-    //SHA1 udmm2(var_2, 0);
+    /* test 5: million a
+    const char a_digest[] = "34aa973cd4c4daa4f61eeb2bdbad27316534016f";
+    char a_str[1000001];
+    char a_output[21];
+    char a_hex[41];
 
-    //SHA1 udmm3(var_3, length(var_3));
-    //SHA1 udmm4(var_4, length(var_4));
+    for(u32 i=0; i<1000000; i++) a_str[i] = 'a';
+    a_str[1000000] ='\0';
 
-    u32 ll= 1000001;
-    char ff_str[ll];
+    sha1(a_output, a_str, strlen(a_str));
 
-    for(u32 i=0; i<ll; i++) ff_str[i] = 'a';
+    digest_to_hex_string(a_output, a_hex);
 
-    SHA1 ff(ff_str, length(ff_str));
-
-    /* spliting u64 into 2 u32 arrays
-    u64 x = 12345678912345;
-    u32 y[2];
-
-    y[0]= x>>32;
-    y[1] = x;
-
-    bitShow( x );
-    bitShow( y[0] );
-    bitShow( y[1] );
-    showBits( ((u64)y[0]<<32)+y[1] );
+    test( a_digest, a_hex );
     /**/
 
     //showBits( rotl(0x7fff,1) );
