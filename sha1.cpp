@@ -166,7 +166,7 @@ void SHA1::process() {
     h3 += d;
     h4 += e;
 
-    for(u8 i=0; i<16; i++) buffer.words[i] = 0;
+    //for(u8 i=0; i<16; i++) buffer.words[i] = 0;
 }
 
 void SHA1::update(const char * str, u64 length){
@@ -199,27 +199,21 @@ void SHA1::update(const char * str, u64 length){
 
 void SHA1::final() {
 
-    if (byte_left > 55) {
+    buffer.bytes[byte_left] = 0x80 ;
+    memset(&buffer.bytes[byte_left+1], 0, 63-byte_left);
 
-        buffer.bytes[byte_left] = 0x80 ;
-        for(u8 i = byte_left + 1; i < 64; i++) buffer.bytes[i] = 0;
+    if (byte_left > 55) {
 
         for(u8 i=0; i<16; i++) buffer.words[i] = endianWord(buffer.words[i]);
         process();
-
-
-        for(u8 i=0; i<14; i++) buffer.words[i] = 0;
-        putBitCountAtTheEnd();
+        memset( &buffer, 0, 64);
 
     } else {
 
-        buffer.bytes[byte_left] = 0x80 ;
-        for(u8 i = byte_left + 1; i < 56; i++) buffer.bytes[i] = 0;
-
         for(u8 i=0; i<14; i++) buffer.words[i] = endianWord(buffer.words[i]);
-        putBitCountAtTheEnd();
 
     }
 
+    putBitCountAtTheEnd();
     process();
 }

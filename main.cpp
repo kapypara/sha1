@@ -145,6 +145,9 @@ int main() {
 
     test(test8answer.c_str(), output8_hex, 8);
 
+    // test 9: 60 bytes
+    const char string_random9[] = "stuff123456stuff123456123456stuff123456123456stuff1234456333";
+    test_hashing("07ed6dcdbd6035629f2aa3cafb4c0cdc5b39ab27", string_random, strlen(string_random9), 9);
 
     //showBits( rotl(0x7fff,1) );
 
