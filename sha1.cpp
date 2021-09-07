@@ -1,9 +1,10 @@
 #include "sha1.h"
 
-char *sha1(char *out, const char *str, const u64 length){
+void sha1(char *out, const char *str, const u64 length){
     SHA1 hash;
 
     hash.update(str, length);
+    hash.final();
     //hash.print();
 
     hash.output(out);
@@ -28,11 +29,12 @@ void SHA1::output(char *out) const{
 
 void SHA1::print() const {
 
+    //std::cout << "byte count: " << (ml>>3) << '\n';
     //std::cout << std::hex << h0 << h1 << h2 << h3 << h4 << '\n';
     std::printf("%08x%08x%08x%08x%08x\n",h0,h1,h2,h3,h4);
 }
 
-u32 SHA1::callWord(u32 word){
+u32 SHA1::endianWord(u32 word){
 #if BYTE_ORDER == LITTLE_ENDIAN
     return (rotl(word,24 ) & 0xFF00FF00) | (rotl(word,8) & 0x00FF00FF);
 #elif BYTE_ORDER == BIG_ENDIAN
@@ -43,6 +45,7 @@ u32 SHA1::callWord(u32 word){
 }
 
 void SHA1::putBitCountAtTheEnd(){
+    // this may be broken in BIG_ENDIAN. maybe flipping the 14 & 15 will fix it in that case.
     buffer.words[14] = ml>>32 ;
     buffer.words[15] = ml ;
 }
@@ -87,21 +90,21 @@ u32 get_temp(u32 *w, const u8 i, const u32 a, const u32 e, const u32 f, const u3
     return rotl(a,5) + f + e + k + w[s];
 }
 
-void SHA1::process(u8 chunk[64]) {
+void SHA1::process() {
 
 
-    u32 * word = (u32*)chunk;
+    u32 * word = buffer.words;
 
     // make sure words are in big ENDIAN
-    //for(u8 i=0; i<16; i++) word[i] = callWord(word[i]);
+    //for(u8 i=0; i<16; i++) word[i] = endianWord(word[i]);
 
-    //showBits( callWord(0) );
+    //showBits( endianWord(0) );
 
 
     /*
     std::cout << "[ SHA1::process ] listing words!, data in hex\n";
-    for(u8 t=0;t<16; t++){
-        std::cout << std::dec << 't' << (int)t << ": " << std::hex << word[t] << std::dec << '\n';
+    for (u8 t = 0; t < 16; t++) {
+        std::cout << std::dec << 't' << (int) t << ": " << std::hex << word[t] << std::dec << '\n';
         showBits(word[t]);
     }
     std::cout << "[ SHA1::process ] done listing words!\n";
@@ -162,70 +165,61 @@ void SHA1::process(u8 chunk[64]) {
     h2 += c;
     h3 += d;
     h4 += e;
+
+    for(u8 i=0; i<16; i++) buffer.words[i] = 0;
 }
 
 void SHA1::update(const char * str, u64 length){
 
-    u64 byte_left, byte_passed;
+    ml += (length<<3);
+    u64 byte_added;
+    u64 byte_passed = 0;
 
-    byte_left = length;
+    while ( (length+byte_left) > 63 ) {
 
-    do {
-        byte_passed = ml>>3; // just for readability, only used in memcpy()
+        byte_added = 64-byte_left;
 
-        memcpy(&buffer.bytes, (str + byte_passed), upto64(byte_left) );
+        memcpy(&buffer.bytes[byte_left] , &str[byte_passed], byte_added );
 
-        if( byte_left > 64 ) {
+        length -= byte_added;
+        byte_passed += byte_added;
 
-            byte_left -= 64;
-            ml += 512;
+        byte_left=0;
 
-            for(u8 i=0; i<16; i++) buffer.words[i] = callWord(buffer.words[i]);
+        for(u8 i=0; i<16; i++) buffer.words[i] = endianWord(buffer.words[i]);
+        process();
+    }
 
-        } else if( byte_left == 64) {
+    memcpy(&buffer.bytes[byte_left] , &str[byte_passed], length);
 
-            ml += 512;
-            byte_left = 0;
-
-            for(u8 i=0; i<16; i++) buffer.words[i] = callWord(buffer.words[i]);
-            process(buffer.bytes);
-
-            buffer.words[0] = 0x80000000; // 1 at the beginning of the first word
-            for(u8 i=1; i<14; i++) buffer.words[i] = 0;
-            putBitCountAtTheEnd();
-
-        } else if (byte_left >55) {
-
-            ml += (byte_left<<3);
-
-            buffer.bytes[byte_left] = 0x80 ;
-            for(u8 i = byte_left+1; i< 64; i++) buffer.bytes[i] = 0;
-
-            for(u8 i=0; i<16; i++) buffer.words[i] = callWord(buffer.words[i]);
-            process(buffer.bytes);
-
-            for(u8 i=0; i<14; i++) buffer.words[i] = 0;
-            putBitCountAtTheEnd();
-
-            byte_left = 0;
-
-        } else {
-
-            ml += (byte_left<<3); // shifting by 3 instead of multiplying by 8
-
-            buffer.bytes[byte_left] = 0x80 ;
-            for(u8 i = byte_left+1; i< 56; i++) buffer.bytes[i] = 0;
-
-            for(u8 i=0; i<14; i++) buffer.words[i] = callWord(buffer.words[i]);
-            putBitCountAtTheEnd();
-
-            byte_left = 0;
-
-        }
-
-        process(buffer.bytes);
-
-    } while(byte_left>0);
+    byte_left += length;
 
     //print();
+}
+
+void SHA1::final() {
+
+    if (byte_left > 55) {
+
+        buffer.bytes[byte_left] = 0x80 ;
+        for(u8 i = byte_left + 1; i < 64; i++) buffer.bytes[i] = 0;
+
+        for(u8 i=0; i<16; i++) buffer.words[i] = endianWord(buffer.words[i]);
+        process();
+
+
+        for(u8 i=0; i<14; i++) buffer.words[i] = 0;
+        putBitCountAtTheEnd();
+
+    } else {
+
+        buffer.bytes[byte_left] = 0x80 ;
+        for(u8 i = byte_left + 1; i < 56; i++) buffer.bytes[i] = 0;
+
+        for(u8 i=0; i<14; i++) buffer.words[i] = endianWord(buffer.words[i]);
+        putBitCountAtTheEnd();
+
+    }
+
+    process();
 }

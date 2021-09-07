@@ -7,8 +7,6 @@
 #include <cstring>
 #include "bit_tools.h"
 
-#define upto64(x) ( (x>64) ? 64 : x )
-
 class SHA1 {
 
     u32 h0 = 0x67452301;
@@ -18,6 +16,7 @@ class SHA1 {
     u32 h4 = 0xC3D2E1F0;
 
     u64 ml = 0; // message length in bits
+    u64 byte_left = 0; // byte left in chunck
 
     typedef union {
         u8 bytes[64];
@@ -26,24 +25,20 @@ class SHA1 {
 
     chunk_t buffer = { .bytes = {} }; // declare with bytes being empty;
 
-    u32 callWord(u32 word); // make sure words are in big ENDIAN
+    inline u32 endianWord(u32 word); // set words in big ENDIAN if needed
     void putBitCountAtTheEnd(); // put ml at the end of the buffer
+    void process(); // hash 512 bits in the buffer and then clear it.
 
 public:
-    void process(u8 chunk[64]); // hash 512 bits, main function of this class
     void update(const char * str, u64 length); // parse str to process
+    void final();
     void print() const; // print string out
     void output(char * out) const; // return the hash pieces
 
     SHA1() = default;
 
-    SHA1(const char * str, u64 len){
-        update(str, len);
-    };
-
-
 };
 
-char * sha1(char *out, const char *str, u64 length);
+void sha1(char *out, const char *str, u64 length);
 
 #endif //MY_SHA1_SHA1_H
