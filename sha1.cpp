@@ -1,15 +1,5 @@
 #include "sha1.h"
 
-void sha1(char *out, const char *str, const u64 length){
-    SHA1 hash;
-
-    hash.update(str, length);
-    hash.final();
-    //hash.print();
-
-    hash.output(out);
-}
-
 inline void wordToChar(char *str, u8 offset, u32 word){
 
     sprintf(str+offset,  "%c%c%c%c", (u8)(word>>24), (u8)(word>>16), (u8)(word>>8), (u8)(word)  );
@@ -34,13 +24,11 @@ void SHA1::print() const {
     std::printf("%08x%08x%08x%08x%08x\n",h0,h1,h2,h3,h4);
 }
 
-u32 SHA1::endianWord(u32 word){
+void SHA1::endianWord(u8 i){
 #if BYTE_ORDER == LITTLE_ENDIAN
-    return (rotl(word,24 ) & 0xFF00FF00) | (rotl(word,8) & 0x00FF00FF);
+    buffer.words[i] =  (rotl(buffer.words[i],24 ) & 0xFF00FF00) | (rotl(buffer.words[i],8) & 0x00FF00FF);
 #elif BYTE_ORDER == BIG_ENDIAN
-    return word;
-#else
-#error "Endianness not defined!"
+    ;
 #endif
 }
 
@@ -50,15 +38,15 @@ void SHA1::putBitCountAtTheEnd(){
     buffer.words[15] = ml ;
 }
 
-inline u32 Ch(u32 x, u32 y, u32 z){
+inline u32 Ch(const u32 x, const u32 y, const u32 z){
     return (x & y) ^ (~x & z);
 }
 
-inline u32 Parity(u32 x, u32 y, u32 z){
+inline u32 Parity(const u32 x, const u32 y, const u32 z){
     return x ^ y ^ z;
 }
 
-inline u32 Maj(u32 x, u32 y, u32 z){
+inline u32 Maj(const u32 x, const u32 y, const u32 z){
     return (x & y) ^ (x & z) ^ (y & z);
 }
 
@@ -92,14 +80,7 @@ u32 get_temp(u32 *w, const u8 i, const u32 a, const u32 e, const u32 f, const u3
 
 void SHA1::process() {
 
-
     u32 * word = buffer.words;
-
-    // make sure words are in big ENDIAN
-    //for(u8 i=0; i<16; i++) word[i] = endianWord(word[i]);
-
-    //showBits( endianWord(0) );
-
 
     /*
     std::cout << "[ SHA1::process ] listing words!, data in hex\n";
@@ -186,7 +167,7 @@ void SHA1::update(const char * str, u64 length){
 
         byte_left=0;
 
-        for(u8 i=0; i<16; i++) buffer.words[i] = endianWord(buffer.words[i]);
+        for(u8 i=0; i<16; i++) endianWord(i);
         process();
     }
 
@@ -204,16 +185,27 @@ void SHA1::final() {
 
     if (byte_left > 55) {
 
-        for(u8 i=0; i<16; i++) buffer.words[i] = endianWord(buffer.words[i]);
+        for(u8 i=0; i<16; i++) endianWord(i);
         process();
-        memset( &buffer, 0, 64);
+
+        memset(&buffer, 0, 64);
 
     } else {
 
-        for(u8 i=0; i<14; i++) buffer.words[i] = endianWord(buffer.words[i]);
+        for(u8 i=0; i<14; i++) endianWord(i);
 
     }
 
     putBitCountAtTheEnd();
     process();
+}
+
+void sha1(char *out, const char *str, const u64 length){
+    SHA1 hash;
+
+    hash.update(str, length);
+    hash.final();
+    //hash.print();
+
+    hash.output(out);
 }

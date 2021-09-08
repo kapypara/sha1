@@ -25,7 +25,7 @@ class SHA1 {
 
     chunk_t buffer = { .bytes = {} }; // declare with bytes being empty;
 
-    inline u32 endianWord(u32 word); // set words in big ENDIAN if needed
+    inline void endianWord(u8 i); // set words in big ENDIAN if needed
     void putBitCountAtTheEnd(); // put ml at the end of the buffer
     void process(); // hash 512 bits in the buffer and then clear it.
 
