@@ -39,6 +39,7 @@ void SHA1::putBitCountAtTheEnd(){
 }
 
 inline u32 Ch(const u32 x, const u32 y, const u32 z){
+    return ( x & (y^z) ) ^ z ;
     return (x & y) ^ (~x & z);
 }
 
@@ -47,6 +48,7 @@ inline u32 Parity(const u32 x, const u32 y, const u32 z){
 }
 
 inline u32 Maj(const u32 x, const u32 y, const u32 z){
+    return ( (x|y) & z ) | (x&y) ;
     return (x & y) ^ (x & z) ^ (y & z);
 }
 
@@ -101,7 +103,6 @@ void SHA1::process() {
     u32 f, k, temp;
 
     u8 t = 0;
-
 
     k = 0x5A827999;
     for(; t < 16; t++){
