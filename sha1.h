@@ -16,7 +16,7 @@ class SHA1 {
     u32 h4 = 0xC3D2E1F0;
 
     u64 ml = 0; // message length in bits
-    u64 byte_left = 0; // byte left in chunck
+    u64 bytes_in_buffer = 0; // byte left in chunck
 
     typedef union {
         u8 bytes[64];

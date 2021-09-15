@@ -1,5 +1,15 @@
 #include "sha1.h"
 
+void sha1(char *out, const char *str, const u64 length){
+    SHA1 hash;
+
+    hash.update(str, length);
+    hash.final();
+    //hash.print();
+
+    hash.output(out);
+}
+
 inline void wordToChar(char *str, u8 offset, u32 word){
 
     sprintf(str+offset,  "%c%c%c%c", (u8)(word>>24), (u8)(word>>16), (u8)(word>>8), (u8)(word)  );
@@ -93,7 +103,6 @@ void SHA1::process() {
     std::cout << "[ SHA1::process ] done listing words!\n";
     /**/
 
-
     u32 a = h0;
     u32 b = h1;
     u32 c = h2;
@@ -153,38 +162,38 @@ void SHA1::process() {
 
 void SHA1::update(const char * str, u64 length){
 
-    ml += (length<<3);
+    ml += (length<<3); // converting bytes into bits, right bit shift by three is the equivalent of multiplying by 8
     u64 byte_added;
     u64 byte_passed = 0;
 
-    while ( (length+byte_left) > 63 ) {
+    while ((length + bytes_in_buffer) > 63 ) {
 
-        byte_added = 64-byte_left;
+        byte_added = 64 - bytes_in_buffer;
 
-        memcpy(&buffer.bytes[byte_left] , &str[byte_passed], byte_added );
+        memcpy(&buffer.bytes[bytes_in_buffer] , &str[byte_passed], byte_added );
 
         length -= byte_added;
         byte_passed += byte_added;
 
-        byte_left=0;
+        bytes_in_buffer=0;
 
         for(u8 i=0; i<16; i++) endianWord(i);
         process();
     }
 
-    memcpy(&buffer.bytes[byte_left] , &str[byte_passed], length);
+    memcpy(&buffer.bytes[bytes_in_buffer] , &str[byte_passed], length);
 
-    byte_left += length;
+    bytes_in_buffer += length;
 
     //print();
 }
 
 void SHA1::final() {
 
-    buffer.bytes[byte_left] = 0x80 ;
-    memset(&buffer.bytes[byte_left+1], 0, 63-byte_left);
+    buffer.bytes[bytes_in_buffer] = 0x80 ;
+    memset(&buffer.bytes[bytes_in_buffer + 1], 0, 63 - bytes_in_buffer);
 
-    if (byte_left > 55) {
+    if (bytes_in_buffer > 55) {
 
         for(u8 i=0; i<16; i++) endianWord(i);
         process();
@@ -199,14 +208,4 @@ void SHA1::final() {
 
     putBitCountAtTheEnd();
     process();
-}
-
-void sha1(char *out, const char *str, const u64 length){
-    SHA1 hash;
-
-    hash.update(str, length);
-    hash.final();
-    //hash.print();
-
-    hash.output(out);
 }
