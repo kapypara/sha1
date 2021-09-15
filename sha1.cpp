@@ -70,14 +70,14 @@ inline void updateVars(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, const u32 *t){
     /**/
 }
 
-u32 get_temp(u32 *w, const u8 i, const u32 a, const u32 e, const u32 f, const u32 k){
+u32 getWord(u32 *w, const u8 i){
 
     const u8 s = i & 0xf; // mask for values above 16
 
     w[s] = w[ (s+13) & 0xf ] ^ w[ (s+8) & 0xf ] ^ w[ (s+2) & 0xf ] ^ w[s];
     w[s] = rotl( w[s], 1);
 
-    return rotl(a,5) + f + e + k + w[s];
+    return w[s];
 }
 
 void SHA1::process() {
@@ -114,7 +114,7 @@ void SHA1::process() {
     for(; t < 20; t++){
 
         f = Ch(b,c,d);
-        temp = get_temp(word, t, a, e, f, k);
+        temp = rotl(a,5) + f + e + k + getWord(word, t);
         updateVars(&a, &b, &c, &d, &e, &temp);
     }
 
@@ -122,7 +122,7 @@ void SHA1::process() {
     for(; t < 40; t++){
 
         f = Parity(b,c,d);
-        temp = get_temp(word, t, a, e, f, k);
+        temp = rotl(a,5) + f + e + k + getWord(word, t);
         updateVars(&a, &b, &c, &d, &e, &temp);
     }
 
@@ -130,7 +130,7 @@ void SHA1::process() {
     for(; t < 60; t++){
 
         f = Maj(b,c,d);
-        temp = get_temp(word, t, a, e, f, k);
+        temp = rotl(a,5) + f + e + k + getWord(word, t);
         updateVars(&a, &b, &c, &d, &e, &temp);
     }
 
@@ -138,7 +138,7 @@ void SHA1::process() {
     for(; t < 80; t++){
 
         f = Parity(b,c,d);
-        temp = get_temp(word, t, a, e, f, k);
+        temp = rotl(a,5) + f + e + k + getWord(word, t);
         updateVars(&a, &b, &c, &d, &e, &temp);
     }
 
