@@ -1,17 +1,24 @@
 #include "bit_tools.h"
 
-u32 rotr(const u32 word, const u16 amount){
-    const u16 bit_count = countBits(word);
+u32 rotr(const u32 word, const u8 amount){
+    return word >> amount | word << (32 - amount);
 
-    if(amount & (bit_count-1)) // like `amount %= bit_count` but faster, I think it works because 32 is a base2
+    /* same as rotl
+    const u8 bit_count = 32; //countBits(word);
+
+    if(amount & (bit_count-1)) // mask only allow values up to 31
     {
         return word >> amount | word << (bit_count - amount);
     }
 
     return word;
+    */
 }
 
-u32 rotl(const u32 word, const u16 amount)  {
+u32 rotl(const u32 word, const u8 amount)  {
+    return word << amount | word >> (32 - amount);
+
+    /* slower but better handling for amount
     const u16 bit_count = countBits(word);
 
     if(amount & (bit_count-1)){
@@ -19,6 +26,7 @@ u32 rotl(const u32 word, const u16 amount)  {
     }
 
     return word;
+    */
 }
 
 void showBits(u64 bits){

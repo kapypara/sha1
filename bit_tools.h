@@ -17,8 +17,8 @@
 #define countBits(bits_) sizeof(bits_) * CHAR_BIT
 
 // rotate bits right and left
-u32 rotr(u32 word, u16 amount);
-u32 rotl(u32 word, u16 amount);
+inline u32 rotr(u32 word, u8 amount);
+inline u32 rotl(u32 word, u8 amount);
 
 // show bits for debugging
 void showBits(u64 bits);
