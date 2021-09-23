@@ -16,9 +16,18 @@
 
 #define countBits(bits_) sizeof(bits_) * CHAR_BIT
 
+#define bit_tools_use_macro 1
+#ifdef bit_tools_use_macro
+
+#define rotr(word, amount) ( word >> amount | word << (32 - amount) )
+#define rotl(word, amount) ( word << amount | word >> (32 - amount) )
+
+#else
 // rotate bits right and left
 u32 rotr(u32 word, u8 amount);
 u32 rotl(u32 word, u8 amount);
+
+#endif
 
 // show bits for debugging
 void showBits(u64 bits);

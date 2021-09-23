@@ -1,5 +1,7 @@
 #include "bit_tools.h"
 
+#ifndef bit_tools_use_macro
+
 u32 rotr(const u32 word, const u8 amount){
     return word >> amount | word << (32 - amount);
 
@@ -28,6 +30,7 @@ u32 rotl(const u32 word, const u8 amount)  {
     return word;
     */
 }
+#endif
 
 void showBits(u64 bits){
     const u16 bit_count = countBits(u64) - 1;
