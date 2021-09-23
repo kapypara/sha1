@@ -90,14 +90,26 @@ inline u32 * getWord(u32 *w, const u8 i){
     return &w[s];
 }
 
-inline void r0(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, const u32 *w, const u8 t){
+inline void r0(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, const u32 *w, u8 const& t){
 
     static const u32 k = 0x5A827999;
 
-    const u32 f = Ch(*b,*c,*d);
-    const u32 temp = rotl(*a,5) + f + *e + k + w[t];
+    u32 temp;
+    u32 f0, f1;
 
-    updateVars(a, b, c, d, e, temp);
+    f0 = Ch(*b,*c,*d);
+    temp = rotl(*a, 5) + f0 + *e + k + w[t];
+
+    *e = *c;
+
+    *b = rotl(*b, 30);
+    *c = rotl(*a, 30);
+
+    f1 = Ch(*a,*b,*e); // using e since it became c
+    *a = rotl(temp, 5) + f1 + *d + k + w[t+1];
+
+    *d = *b;
+    *b = temp;
 }
 
 inline void r1(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
@@ -115,8 +127,8 @@ inline void r1(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
     *b = rotl(*b, 30);
     *c = rotl(*a, 30);
 
-    f1 = Ch(*a,*b,*e); // using e since it became c
-    *a = rotl(temp, 5) + *d + k + *getWord(w, t + 1) + f1;
+    f1 = Ch(*a,*b,*e);
+    *a = rotl(temp, 5) + f1 + *d + k + *getWord(w, t+1);
 
     *d = *b;
     *b = temp;
@@ -146,7 +158,7 @@ inline void r2(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
     *c = rotl(*a, 30);
 
     f1 = Parity(*a,*b,*e);
-    *a = rotl(temp, 5) + *d + k + *getWord(w, t + 1) + f1;
+    *a = rotl(temp, 5) + f1 + *d + k + *getWord(w, t+1);
 
     *d = *b;
     *b = temp;
@@ -156,20 +168,44 @@ inline void r3(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
 
     static const u32 k = 0x8F1BBCDC;
 
-    const u32 f = Maj(*b,*c,*d);
-    const u32 temp = rotl(*a,5) + f + *e + k + *getWord(w, t);
+    u32 temp;
+    u32 f0, f1;
 
-    updateVars(a, b, c, d, e, temp);
+    f0 = Maj(*b,*c,*d);
+    temp = rotl(*a, 5) + f0 + *e + k + *getWord(w, t);
+
+    *e = *c;
+
+    *b = rotl(*b, 30);
+    *c = rotl(*a, 30);
+
+    f1 = Maj(*a,*b,*e);
+    *a = rotl(temp, 5) + f1 + *d + k + *getWord(w, t+1);
+
+    *d = *b;
+    *b = temp;
 }
 
 inline void r4(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
 
     static const u32 k = 0xCA62C1D6;
 
-    const u32 f = Parity(*b,*c,*d);
-    const u32 temp = rotl(*a,5) + f + *e + k + *getWord(w, t);
+    u32 temp;
+    u32 f0, f1;
 
-    updateVars(a, b, c, d, e, temp);
+    f0 = Parity(*b,*c,*d);
+    temp = rotl(*a, 5) + f0 + *e + k + *getWord(w, t);
+
+    *e = *c;
+
+    *b = rotl(*b, 30);
+    *c = rotl(*a, 30);
+
+    f1 = Parity(*a,*b,*e);
+    *a = rotl(temp, 5) + f1 + *d + k + *getWord(w, t+1);
+
+    *d = *b;
+    *b = temp;
 }
 
 void SHA1::process() {
@@ -194,21 +230,21 @@ void SHA1::process() {
     u32 *a=&var_a, *b=&var_b, *c=&var_c, *d=&var_d, *e=&var_e;
 
     r0(a, b, c, d, e, word, 0);
-    r0(a, b, c, d, e, word, 1);
+    //r0(a, b, c, d, e, word, 1);
     r0(a, b, c, d, e, word, 2);
-    r0(a, b, c, d, e, word, 3);
+    //r0(a, b, c, d, e, word, 3);
     r0(a, b, c, d, e, word, 4);
-    r0(a, b, c, d, e, word, 5);
+    //r0(a, b, c, d, e, word, 5);
     r0(a, b, c, d, e, word, 6);
-    r0(a, b, c, d, e, word, 7);
+    //r0(a, b, c, d, e, word, 7);
     r0(a, b, c, d, e, word, 8);
-    r0(a, b, c, d, e, word, 9);
+    //r0(a, b, c, d, e, word, 9);
     r0(a, b, c, d, e, word, 10);
-    r0(a, b, c, d, e, word, 11);
+    //r0(a, b, c, d, e, word, 11);
     r0(a, b, c, d, e, word, 12);
-    r0(a, b, c, d, e, word, 13);
+    //r0(a, b, c, d, e, word, 13);
     r0(a, b, c, d, e, word, 14);
-    r0(a, b, c, d, e, word, 15);
+    //r0(a, b, c, d, e, word, 15);
 
     r1(a, b, c, d, e, word, 16);
     //r1(a, b, c, d, e, word, 17);
@@ -237,46 +273,46 @@ void SHA1::process() {
     //r2(a, b, c, d, e, word, 39);
 
     r3(a, b, c, d, e, word, 40);
-    r3(a, b, c, d, e, word, 41);
+    //r3(a, b, c, d, e, word, 41);
     r3(a, b, c, d, e, word, 42);
-    r3(a, b, c, d, e, word, 43);
+    //r3(a, b, c, d, e, word, 43);
     r3(a, b, c, d, e, word, 44);
-    r3(a, b, c, d, e, word, 45);
+    //r3(a, b, c, d, e, word, 45);
     r3(a, b, c, d, e, word, 46);
-    r3(a, b, c, d, e, word, 47);
+    //r3(a, b, c, d, e, word, 47);
     r3(a, b, c, d, e, word, 48);
-    r3(a, b, c, d, e, word, 49);
+    //r3(a, b, c, d, e, word, 49);
     r3(a, b, c, d, e, word, 50);
-    r3(a, b, c, d, e, word, 51);
+    //r3(a, b, c, d, e, word, 51);
     r3(a, b, c, d, e, word, 52);
-    r3(a, b, c, d, e, word, 53);
+    //r3(a, b, c, d, e, word, 53);
     r3(a, b, c, d, e, word, 54);
-    r3(a, b, c, d, e, word, 55);
+    //r3(a, b, c, d, e, word, 55);
     r3(a, b, c, d, e, word, 56);
-    r3(a, b, c, d, e, word, 57);
+    //r3(a, b, c, d, e, word, 57);
     r3(a, b, c, d, e, word, 58);
-    r3(a, b, c, d, e, word, 59);
+    //r3(a, b, c, d, e, word, 59);
 
     r4(a, b, c, d, e, word, 60);
-    r4(a, b, c, d, e, word, 61);
+    //r4(a, b, c, d, e, word, 61);
     r4(a, b, c, d, e, word, 62);
-    r4(a, b, c, d, e, word, 63);
+    //r4(a, b, c, d, e, word, 63);
     r4(a, b, c, d, e, word, 64);
-    r4(a, b, c, d, e, word, 65);
+    //r4(a, b, c, d, e, word, 65);
     r4(a, b, c, d, e, word, 66);
-    r4(a, b, c, d, e, word, 67);
+    //r4(a, b, c, d, e, word, 67);
     r4(a, b, c, d, e, word, 68);
-    r4(a, b, c, d, e, word, 69);
+    //r4(a, b, c, d, e, word, 69);
     r4(a, b, c, d, e, word, 70);
-    r4(a, b, c, d, e, word, 71);
+    //r4(a, b, c, d, e, word, 71);
     r4(a, b, c, d, e, word, 72);
-    r4(a, b, c, d, e, word, 73);
+    //r4(a, b, c, d, e, word, 73);
     r4(a, b, c, d, e, word, 74);
-    r4(a, b, c, d, e, word, 75);
+    //r4(a, b, c, d, e, word, 75);
     r4(a, b, c, d, e, word, 76);
-    r4(a, b, c, d, e, word, 77);
+    //r4(a, b, c, d, e, word, 77);
     r4(a, b, c, d, e, word, 78);
-    r4(a, b, c, d, e, word, 79);
+    //r4(a, b, c, d, e, word, 79);
 
     h0 += *a;
     h1 += *b;
