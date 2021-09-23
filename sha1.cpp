@@ -48,21 +48,21 @@ void SHA1::putBitCountAtTheEnd(){
     buffer.words[15] = ml ;
 }
 
-inline u32 Ch(const u32 x, const u32 y, const u32 z){
+inline u32 Ch(u32 const& x, u32 const& y, u32 const& z){
     return ( x & (y^z) ) ^ z ;
     return (x & y) ^ (~x & z);
 }
 
-inline u32 Parity(const u32 x, const u32 y, const u32 z){
+inline u32 Parity(u32 const& x, u32 const& y, u32 const& z){
     return x ^ y ^ z;
 }
 
-inline u32 Maj(const u32 x, const u32 y, const u32 z){
+inline u32 Maj(u32 const& x, u32 const& y, u32 const& z){
     return ( (x|y) & z ) | (x&y) ;
     return (x & y) ^ (x & z) ^ (y & z);
 }
 
-inline void updateVars(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, const u32 *t){
+inline void updateVars(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 const& t){
 
     *b = rotl(*b, 30);
 
@@ -70,7 +70,7 @@ inline void updateVars(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, const u32 *t){
     *d = *c;
     *c = *b;
     *b = *a;
-    *a = *t;
+    *a = t;
 
     /*
     static int i = 0;
