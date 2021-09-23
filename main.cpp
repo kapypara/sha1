@@ -101,7 +101,7 @@ int main() {
 
     //* test 7: file
     auto const test7beging = std::chrono::system_clock::now();
-    const std::string test7answer = "9c266ac2be4f2210223026456c30810ee3d3931c";
+    const std::string test7answer = "7e827ac16eb9a161306468bdd1c86d43a10c9aa2";
     std::ifstream file("/tmp/img.jpg", std::ios::binary);
 
     if( file ) {
@@ -126,7 +126,7 @@ int main() {
 
     // test 8: file loaded into a prefixed array
     auto const test8beging = std::chrono::system_clock::now();
-    const std::string test8answer = "9c266ac2be4f2210223026456c30810ee3d3931c";
+    const std::string test8answer = "7e827ac16eb9a161306468bdd1c86d43a10c9aa2";
     char output8[21];
     char output8_hex[41];
 

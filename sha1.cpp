@@ -80,14 +80,14 @@ inline void updateVars(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 const& t){
     /**/
 }
 
-inline u32 getWord(u32 *w, const u8 i){
+inline u32 * getWord(u32 *w, const u8 i){
 
     const u8 s = i & 0xf; // mask for values above 16
 
     w[s] = w[ (s+13) & 0xf ] ^ w[ (s+8) & 0xf ] ^ w[ (s+2) & 0xf ] ^ w[s];
     w[s] = rotl( w[s], 1);
 
-    return w[s];
+    return &w[s];
 }
 
 inline void r0(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, const u32 *w, const u8 t){
@@ -105,7 +105,7 @@ inline void r1(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
     static const u32 k = 0x5A827999;
 
     const u32 f = Ch(*b,*c,*d);
-    const u32 temp = rotl(*a,5) + f + *e + k + getWord(w, t);
+    const u32 temp = rotl(*a,5) + f + *e + k + *getWord(w, t);
 
     updateVars(a, b, c, d, e, temp);
 }
@@ -115,7 +115,7 @@ inline void r2(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
     static const u32 k = 0x6ED9EBA1;
 
     const u32 f = Parity(*b,*c,*d);
-    const u32 temp = rotl(*a,5) + f + *e + k + getWord(w, t);
+    const u32 temp = rotl(*a,5) + f + *e + k + *getWord(w, t);
 
     updateVars(a, b, c, d, e, temp);
 }
@@ -125,7 +125,7 @@ inline void r3(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
     static const u32 k = 0x8F1BBCDC;
 
     const u32 f = Maj(*b,*c,*d);
-    const u32 temp = rotl(*a,5) + f + *e + k + getWord(w, t);
+    const u32 temp = rotl(*a,5) + f + *e + k + *getWord(w, t);
 
     updateVars(a, b, c, d, e, temp);
 }
@@ -135,7 +135,7 @@ inline void r4(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
     static const u32 k = 0xCA62C1D6;
 
     const u32 f = Parity(*b,*c,*d);
-    const u32 temp = rotl(*a,5) + f + *e + k + getWord(w, t);
+    const u32 temp = rotl(*a,5) + f + *e + k + *getWord(w, t);
 
     updateVars(a, b, c, d, e, temp);
 }
