@@ -102,12 +102,29 @@ inline void r0(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, const u32 *w, const u8 t)
 
 inline void r1(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
 
+    const u32 ag = *a, bg = *b, cg = *c, dg = *d, eg = *e;
+
     static const u32 k = 0x5A827999;
 
     const u32 f = Ch(*b,*c,*d);
-    const u32 temp = rotl(*a,5) + f + *e + k + *getWord(w, t);
 
-    updateVars(a, b, c, d, e, temp);
+    u32 temp = rotl(*a,5) + f + *e + k + *getWord(w, t);
+    *b = temp;
+
+    *a = rotl(temp, 5) + dg + k + *getWord(w, t+1) +
+        Ch(ag,rotl(bg, 30), cg);
+
+    *c = rotl(ag,30);
+    *d = rotl(bg, 30);
+    *e = cg;
+    //updateVars(a, b, c, d, e, temp);
+
+    //*
+    static int i = 17;
+    std::cout << std::dec << "t" << i << std::hex <<
+        " a: " << *a << ", b: " << *b << ", c: " << *c << ", d: " << *d << ", e: " << *e << '\n';
+    i+=2;
+    /**/
 }
 
 inline void r2(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
@@ -179,9 +196,9 @@ void SHA1::process() {
     r0(a, b, c, d, e, word, 15);
 
     r1(a, b, c, d, e, word, 16);
-    r1(a, b, c, d, e, word, 17);
+    //r1(a, b, c, d, e, word, 17);
     r1(a, b, c, d, e, word, 18);
-    r1(a, b, c, d, e, word, 19);
+    //r1(a, b, c, d, e, word, 19);
 
     r2(a, b, c, d, e, word, 20);
     r2(a, b, c, d, e, word, 21);
