@@ -62,24 +62,6 @@ inline u32 Maj(u32 const& x, u32 const& y, u32 const& z){
     return (x & y) ^ (x & z) ^ (y & z);
 }
 
-inline void updateVars(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 const& t){
-
-    *b = rotl(*b, 30);
-
-    *e = *d;
-    *d = *c;
-    *c = *b;
-    *b = *a;
-    *a = t;
-
-    /*
-    static int i = 0;
-    std::cout << std::dec << "t" << i << std::hex <<
-        " a: " << *a << ", b: " << *b << ", c: " << *c << ", d: " << *d << ", e: " << *e << '\n';
-    i+=1;
-    /**/
-}
-
 inline u32 * getWord(u32 *w, const u8 i){
 
     const u8 s = i & 0xf; // mask for values above 16
@@ -117,7 +99,7 @@ inline void r1(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
     static const u32 k = 0x5A827999;
 
     u32 temp;
-    u32 f0, f1;
+    u32 f0, f1; // ft and ft+1
 
     f0 = Ch(*b,*c,*d);
     temp = rotl(*a, 5) + f0 + *e + k + *getWord(w, t);

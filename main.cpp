@@ -129,7 +129,7 @@ int main() {
     char output8[21];
     char output8_hex[41];
 
-    std::ifstream file8("/tmp/img.jpg", std::ios::binary);
+    std::ifstream file8("/tmp/img.jpg");
 
     if( file8 ) {
 
