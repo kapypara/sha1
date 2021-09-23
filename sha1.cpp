@@ -102,25 +102,28 @@ inline void r0(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, const u32 *w, const u8 t)
 
 inline void r1(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
 
-    const u32 ag = *a, bg = *b, cg = *c, dg = *d, eg = *e;
-
     static const u32 k = 0x5A827999;
 
-    const u32 f = Ch(*b,*c,*d);
+    u32 temp;
+    u32 f0, f1;
 
-    u32 temp = rotl(*a,5) + f + *e + k + *getWord(w, t);
+    f0 = Ch(*b,*c,*d);
+    temp = rotl(*a, 5) + f0 + *e + k + *getWord(w, t);
+
+    *e = *c;
+
+    *b = rotl(*b, 30);
+    *c = rotl(*a, 30);
+
+    f1 = Ch(*a,*b,*e); // using e since it became c
+    *a = rotl(temp, 5) + *d + k + *getWord(w, t + 1) + f1;
+
+    *d = *b;
     *b = temp;
-
-    *a = rotl(temp, 5) + dg + k + *getWord(w, t+1) +
-        Ch(ag,rotl(bg, 30), cg);
-
-    *c = rotl(ag,30);
-    *d = rotl(bg, 30);
-    *e = cg;
     //updateVars(a, b, c, d, e, temp);
 
-    //*
-    static int i = 17;
+    /*
+    static int i = t+1;
     std::cout << std::dec << "t" << i << std::hex <<
         " a: " << *a << ", b: " << *b << ", c: " << *c << ", d: " << *d << ", e: " << *e << '\n';
     i+=2;
@@ -131,10 +134,22 @@ inline void r2(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
 
     static const u32 k = 0x6ED9EBA1;
 
-    const u32 f = Parity(*b,*c,*d);
-    const u32 temp = rotl(*a,5) + f + *e + k + *getWord(w, t);
+    u32 temp;
+    u32 f0, f1;
 
-    updateVars(a, b, c, d, e, temp);
+    f0 = Parity(*b,*c,*d);
+    temp = rotl(*a, 5) + f0 + *e + k + *getWord(w, t);
+
+    *e = *c;
+
+    *b = rotl(*b, 30);
+    *c = rotl(*a, 30);
+
+    f1 = Parity(*a,*b,*e);
+    *a = rotl(temp, 5) + *d + k + *getWord(w, t + 1) + f1;
+
+    *d = *b;
+    *b = temp;
 }
 
 inline void r3(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
@@ -201,25 +216,25 @@ void SHA1::process() {
     //r1(a, b, c, d, e, word, 19);
 
     r2(a, b, c, d, e, word, 20);
-    r2(a, b, c, d, e, word, 21);
+    //r2(a, b, c, d, e, word, 21);
     r2(a, b, c, d, e, word, 22);
-    r2(a, b, c, d, e, word, 23);
+    //r2(a, b, c, d, e, word, 23);
     r2(a, b, c, d, e, word, 24);
-    r2(a, b, c, d, e, word, 25);
+    //r2(a, b, c, d, e, word, 25);
     r2(a, b, c, d, e, word, 26);
-    r2(a, b, c, d, e, word, 27);
+    //r2(a, b, c, d, e, word, 27);
     r2(a, b, c, d, e, word, 28);
-    r2(a, b, c, d, e, word, 29);
+    //r2(a, b, c, d, e, word, 29);
     r2(a, b, c, d, e, word, 30);
-    r2(a, b, c, d, e, word, 31);
+    //r2(a, b, c, d, e, word, 31);
     r2(a, b, c, d, e, word, 32);
-    r2(a, b, c, d, e, word, 33);
+    //r2(a, b, c, d, e, word, 33);
     r2(a, b, c, d, e, word, 34);
-    r2(a, b, c, d, e, word, 35);
+    //r2(a, b, c, d, e, word, 35);
     r2(a, b, c, d, e, word, 36);
-    r2(a, b, c, d, e, word, 37);
+    //r2(a, b, c, d, e, word, 37);
     r2(a, b, c, d, e, word, 38);
-    r2(a, b, c, d, e, word, 39);
+    //r2(a, b, c, d, e, word, 39);
 
     r3(a, b, c, d, e, word, 40);
     r3(a, b, c, d, e, word, 41);
