@@ -93,45 +93,50 @@ inline u32 getWord(u32 *w, const u8 i){
 inline void r0(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, const u32 *w, const u8 t){
 
     static const u32 k = 0x5A827999;
-    u32 f = Ch(*b,*c,*d);
-    u32 temp = rotl(*a,5) + f + *e + k + w[t];
+
+    const u32 f = Ch(*b,*c,*d);
+    const u32 temp = rotl(*a,5) + f + *e + k + w[t];
+
     updateVars(a, b, c, d, e, temp);
 }
 
 inline void r1(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
 
     static const u32 k = 0x5A827999;
+
     const u32 f = Ch(*b,*c,*d);
     const u32 temp = rotl(*a,5) + f + *e + k + getWord(w, t);
+
     updateVars(a, b, c, d, e, temp);
 }
 
 inline void r2(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
 
     static const u32 k = 0x6ED9EBA1;
+
     const u32 f = Parity(*b,*c,*d);
     const u32 temp = rotl(*a,5) + f + *e + k + getWord(w, t);
+
     updateVars(a, b, c, d, e, temp);
 }
 
 inline void r3(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
 
     static const u32 k = 0x8F1BBCDC;
+
     const u32 f = Maj(*b,*c,*d);
     const u32 temp = rotl(*a,5) + f + *e + k + getWord(w, t);
+
     updateVars(a, b, c, d, e, temp);
 }
 
 inline void r4(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
 
-    u32 *stemp[] = { a, b, c, d, e, };
-
     static const u32 k = 0xCA62C1D6;
+
     const u32 f = Parity(*b,*c,*d);
     const u32 temp = rotl(*a,5) + f + *e + k + getWord(w, t);
 
-    //*stemp[1%t] = rotl(*b,1);
-    //*stemp[4%t] = temp;
     updateVars(a, b, c, d, e, temp);
 }
 
@@ -175,7 +180,6 @@ void SHA1::process() {
     r1(&a, &b, &c, &d, &e, word, 17);
     r1(&a, &b, &c, &d, &e, word, 18);
     r1(&a, &b, &c, &d, &e, word, 19);
-
 
     r2(&a, &b, &c, &d, &e, word, 20);
     r2(&a, &b, &c, &d, &e, word, 21);
@@ -249,25 +253,36 @@ void SHA1::process() {
     //for(u8 i=0; i<16; i++) buffer.words[i] = 0;
 }
 
-void SHA1::update(const char * str, u64 length){
+void SHA1::update(const char *str, u64 length){
 
     ml += (length<<3); // converting bytes into bits, right bit shift by three is the equivalent of multiplying by 8
     u64 byte_added;
     u64 byte_passed = 0;
 
-    while ((length + bytes_in_buffer) > 63 ) {
+    if ((length + bytes_in_buffer) > 63) {
 
         byte_added = 64 - bytes_in_buffer;
 
-        memcpy(&buffer.bytes[bytes_in_buffer] , &str[byte_passed], byte_added );
+        memcpy(&buffer.bytes[bytes_in_buffer], &str[byte_passed], byte_added);
 
         length -= byte_added;
         byte_passed += byte_added;
 
-        bytes_in_buffer=0;
+        bytes_in_buffer = 0;
 
-        for(u8 i=0; i<16; i++) endianWord(i);
+        for (u8 i = 0; i < 16; i++) endianWord(i);
         process();
+
+        while (length > 63) {
+
+            memcpy(&buffer.bytes[0], &str[byte_passed], 64);
+
+            length -= 64;
+            byte_passed += 64;
+
+            for (u8 i = 0; i < 16; i++) endianWord(i);
+            process();
+        }
     }
 
     memcpy(&buffer.bytes[bytes_in_buffer] , &str[byte_passed], length);
