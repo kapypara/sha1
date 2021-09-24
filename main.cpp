@@ -49,8 +49,6 @@ int main() {
     const char string_abc[] = "abc"; // a9993e364706816aba3e25717850c26c9cd0d89d
     test_hashing("a9993e364706816aba3e25717850c26c9cd0d89d", string_abc, strlen(string_abc), 1);
 
-    return 0;
-
     // test 2: no data
     const char string_empty[] = ""; // da39a3ee5e6b4b0d3255bfef95601890afd80709
     test_hashing("da39a3ee5e6b4b0d3255bfef95601890afd80709", string_empty, strlen(string_empty), 2);

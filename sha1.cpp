@@ -112,34 +112,37 @@ inline void r1(const u32 *a, u32 *b, const u32 *c, const u32 *d, u32 *e, u32 *w,
     *b = rotl(*b, 30);
 }
 
-inline void r2(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
+inline void r2(const u32 *a, u32 *b, const u32 *c, const u32 *d, u32 *e, u32 *w, u8 const& t){
 
     static const u32 k = 0x6ED9EBA1;
 
     const u32 f = Parity(*b,*c,*d);
     const u32 temp = rotl(*a,5) + f + *e + k + *getWord(w, t);
 
-    updateVars(a, b, c, d, e, temp);
+    *e = temp;
+    *b = rotl(*b, 30);
 }
 
-inline void r3(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
+inline void r3(const u32 *a, u32 *b, const u32 *c, const u32 *d, u32 *e, u32 *w, u8 const& t){
 
     static const u32 k = 0x8F1BBCDC;
 
     const u32 f = Maj(*b,*c,*d);
     const u32 temp = rotl(*a,5) + f + *e + k + *getWord(w, t);
 
-    updateVars(a, b, c, d, e, temp);
+    *e = temp;
+    *b = rotl(*b, 30);
 }
 
-inline void r4(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
+inline void r4(const u32 *a, u32 *b, const u32 *c, const u32 *d, u32 *e, u32 *w, u8 const& t){
 
     static const u32 k = 0xCA62C1D6;
 
     const u32 f = Parity(*b,*c,*d);
     const u32 temp = rotl(*a,5) + f + *e + k + *getWord(w, t);
 
-    updateVars(a, b, c, d, e, temp);
+    *e = temp;
+    *b = rotl(*b, 30);
 }
 
 void SHA1::process() {
@@ -155,104 +158,114 @@ void SHA1::process() {
     std::cout << "[ SHA1::process ] done listing words!\n";
     /**/
 
-    u32 var_a = h0;
-    u32 var_b = h1;
-    u32 var_c = h2;
-    u32 var_d = h3;
-    u32 var_e = h4;
+    u32 a = h0;
+    u32 b = h1;
+    u32 c = h2;
+    u32 d = h3;
+    u32 e = h4;
 
-    u32 *a=&var_a, *b=&var_b, *c=&var_c, *d=&var_d, *e=&var_e;
 
-    r0(a, b, c, d, e, word, 0);
-    r0(e, a, b, c, d, word, 1);
-    r0(d, e, a, b, c, word, 2);
-    r0(c, d, e, a, b, word, 3);
-    r0(b, c, d, e, a, word, 4);
-    r0(a, b, c, d, e, word, 5);
-    r0(e, a, b, c, d, word, 6);
-    r0(d, e, a, b, c, word, 7);
-    r0(c, d, e, a, b, word, 8);
-    r0(b, c, d, e, a, word, 9);
-    r0(a, b, c, d, e, word, 10);
-    r0(e, a, b, c, d, word, 11);
-    r0(d, e, a, b, c, word, 12);
-    r0(c, d, e, a, b, word, 13);
-    r0(b, c, d, e, a, word, 14);
-    r0(a, b, c, d, e, word, 15);
+    r0(&a, &b, &c, &d, &e, word, 0);
+    r0(&e, &a, &b, &c, &d, word, 1);
+    r0(&d, &e, &a, &b, &c, word, 2);
+    r0(&c, &d, &e, &a, &b, word, 3);
+    r0(&b, &c, &d, &e, &a, word, 4);
 
-    r1(e, a, b, c, d, word, 16);
-    r1(d, e, a, b, c, word, 17);
-    r1(c, d, e, a, b, word, 18);
-    r1(b, c, d, e, a, word, 19);
+    r0(&a, &b, &c, &d, &e, word, 5);
+    r0(&e, &a, &b, &c, &d, word, 6);
+    r0(&d, &e, &a, &b, &c, word, 7);
+    r0(&c, &d, &e, &a, &b, word, 8);
+    r0(&b, &c, &d, &e, &a, word, 9);
 
-    r2(a, b, c, d, e, word, 20);
-    r2(a, b, c, d, e, word, 21);
-    r2(a, b, c, d, e, word, 22);
-    r2(a, b, c, d, e, word, 23);
-    r2(a, b, c, d, e, word, 24);
-    r2(a, b, c, d, e, word, 25);
-    r2(a, b, c, d, e, word, 26);
-    r2(a, b, c, d, e, word, 27);
-    r2(a, b, c, d, e, word, 28);
-    r2(a, b, c, d, e, word, 29);
-    r2(a, b, c, d, e, word, 30);
-    r2(a, b, c, d, e, word, 31);
-    r2(a, b, c, d, e, word, 32);
-    r2(a, b, c, d, e, word, 33);
-    r2(a, b, c, d, e, word, 34);
-    r2(a, b, c, d, e, word, 35);
-    r2(a, b, c, d, e, word, 36);
-    r2(a, b, c, d, e, word, 37);
-    r2(a, b, c, d, e, word, 38);
-    r2(a, b, c, d, e, word, 39);
+    r0(&a, &b, &c, &d, &e, word, 10);
+    r0(&e, &a, &b, &c, &d, word, 11);
+    r0(&d, &e, &a, &b, &c, word, 12);
+    r0(&c, &d, &e, &a, &b, word, 13);
+    r0(&b, &c, &d, &e, &a, word, 14);
 
-    r3(a, b, c, d, e, word, 40);
-    r3(a, b, c, d, e, word, 41);
-    r3(a, b, c, d, e, word, 42);
-    r3(a, b, c, d, e, word, 43);
-    r3(a, b, c, d, e, word, 44);
-    r3(a, b, c, d, e, word, 45);
-    r3(a, b, c, d, e, word, 46);
-    r3(a, b, c, d, e, word, 47);
-    r3(a, b, c, d, e, word, 48);
-    r3(a, b, c, d, e, word, 49);
-    r3(a, b, c, d, e, word, 50);
-    r3(a, b, c, d, e, word, 51);
-    r3(a, b, c, d, e, word, 52);
-    r3(a, b, c, d, e, word, 53);
-    r3(a, b, c, d, e, word, 54);
-    r3(a, b, c, d, e, word, 55);
-    r3(a, b, c, d, e, word, 56);
-    r3(a, b, c, d, e, word, 57);
-    r3(a, b, c, d, e, word, 58);
-    r3(a, b, c, d, e, word, 59);
+    r0(&a, &b, &c, &d, &e, word, 15);
+    r1(&e, &a, &b, &c, &d, word, 16);
+    r1(&d, &e, &a, &b, &c, word, 17);
+    r1(&c, &d, &e, &a, &b, word, 18);
+    r1(&b, &c, &d, &e, &a, word, 19);
 
-    r4(a, b, c, d, e, word, 60);
-    r4(a, b, c, d, e, word, 61);
-    r4(a, b, c, d, e, word, 62);
-    r4(a, b, c, d, e, word, 63);
-    r4(a, b, c, d, e, word, 64);
-    r4(a, b, c, d, e, word, 65);
-    r4(a, b, c, d, e, word, 66);
-    r4(a, b, c, d, e, word, 67);
-    r4(a, b, c, d, e, word, 68);
-    r4(a, b, c, d, e, word, 69);
-    r4(a, b, c, d, e, word, 70);
-    r4(a, b, c, d, e, word, 71);
-    r4(a, b, c, d, e, word, 72);
-    r4(a, b, c, d, e, word, 73);
-    r4(a, b, c, d, e, word, 74);
-    r4(a, b, c, d, e, word, 75);
-    r4(a, b, c, d, e, word, 76);
-    r4(a, b, c, d, e, word, 77);
-    r4(a, b, c, d, e, word, 78);
-    r4(a, b, c, d, e, word, 79);
+    r2(&a, &b, &c, &d, &e, word, 20);
+    r2(&e, &a, &b, &c, &d, word, 21);
+    r2(&d, &e, &a, &b, &c, word, 22);
+    r2(&c, &d, &e, &a, &b, word, 23);
+    r2(&b, &c, &d, &e, &a, word, 24);
 
-    h0 += *a;
-    h1 += *b;
-    h2 += *c;
-    h3 += *d;
-    h4 += *e;
+    r2(&a, &b, &c, &d, &e, word, 25);
+    r2(&e, &a, &b, &c, &d, word, 26);
+    r2(&d, &e, &a, &b, &c, word, 27);
+    r2(&c, &d, &e, &a, &b, word, 28);
+    r2(&b, &c, &d, &e, &a, word, 29);
+
+    r2(&a, &b, &c, &d, &e, word, 30);
+    r2(&e, &a, &b, &c, &d, word, 31);
+    r2(&d, &e, &a, &b, &c, word, 32);
+    r2(&c, &d, &e, &a, &b, word, 33);
+    r2(&b, &c, &d, &e, &a, word, 34);
+
+    r2(&a, &b, &c, &d, &e, word, 35);
+    r2(&e, &a, &b, &c, &d, word, 36);
+    r2(&d, &e, &a, &b, &c, word, 37);
+    r2(&c, &d, &e, &a, &b, word, 38);
+    r2(&b, &c, &d, &e, &a, word, 39);
+
+    r3(&a, &b, &c, &d, &e, word, 40);
+    r3(&e, &a, &b, &c, &d, word, 41);
+    r3(&d, &e, &a, &b, &c, word, 42);
+    r3(&c, &d, &e, &a, &b, word, 43);
+    r3(&b, &c, &d, &e, &a, word, 44);
+
+    r3(&a, &b, &c, &d, &e, word, 45);
+    r3(&e, &a, &b, &c, &d, word, 46);
+    r3(&d, &e, &a, &b, &c, word, 47);
+    r3(&c, &d, &e, &a, &b, word, 48);
+    r3(&b, &c, &d, &e, &a, word, 49);
+
+    r3(&a, &b, &c, &d, &e, word, 50);
+    r3(&e, &a, &b, &c, &d, word, 51);
+    r3(&d, &e, &a, &b, &c, word, 52);
+    r3(&c, &d, &e, &a, &b, word, 53);
+    r3(&b, &c, &d, &e, &a, word, 54);
+
+    r3(&a, &b, &c, &d, &e, word, 55);
+    r3(&e, &a, &b, &c, &d, word, 56);
+    r3(&d, &e, &a, &b, &c, word, 57);
+    r3(&c, &d, &e, &a, &b, word, 58);
+    r3(&b, &c, &d, &e, &a, word, 59);
+
+    r4(&a, &b, &c, &d, &e, word, 60);
+    r4(&e, &a, &b, &c, &d, word, 61);
+    r4(&d, &e, &a, &b, &c, word, 62);
+    r4(&c, &d, &e, &a, &b, word, 63);
+    r4(&b, &c, &d, &e, &a, word, 64);
+
+    r4(&a, &b, &c, &d, &e, word, 65);
+    r4(&e, &a, &b, &c, &d, word, 66);
+    r4(&d, &e, &a, &b, &c, word, 67);
+    r4(&c, &d, &e, &a, &b, word, 68);
+    r4(&b, &c, &d, &e, &a, word, 69);
+
+    r4(&a, &b, &c, &d, &e, word, 70);
+    r4(&e, &a, &b, &c, &d, word, 71);
+    r4(&d, &e, &a, &b, &c, word, 72);
+    r4(&c, &d, &e, &a, &b, word, 73);
+    r4(&b, &c, &d, &e, &a, word, 74);
+
+    r4(&a, &b, &c, &d, &e, word, 75);
+    r4(&e, &a, &b, &c, &d, word, 76);
+    r4(&d, &e, &a, &b, &c, word, 77);
+    r4(&c, &d, &e, &a, &b, word, 78);
+    r4(&b, &c, &d, &e, &a, word, 79);
+
+    h0 += a;
+    h1 += b;
+    h2 += c;
+    h3 += d;
+    h4 += e;
 
     //for(u8 i=0; i<16; i++) buffer.words[i] = 0;
 }
