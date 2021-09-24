@@ -90,24 +90,26 @@ inline u32 * getWord(u32 *w, const u8 i){
     return &w[s];
 }
 
-inline void r0(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, const u32 *w, const u8 t){
+inline void r0(const u32 *a, u32 *b, const u32 *c, const u32 *d, u32 *e, const u32 *w, u8 const& t){
 
     static const u32 k = 0x5A827999;
 
     const u32 f = Ch(*b,*c,*d);
     const u32 temp = rotl(*a,5) + f + *e + k + w[t];
 
-    updateVars(a, b, c, d, e, temp);
+    *e = temp;
+    *b = rotl(*b, 30);
 }
 
-inline void r1(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
+inline void r1(const u32 *a, u32 *b, const u32 *c, const u32 *d, u32 *e, u32 *w, u8 const& t){
 
     static const u32 k = 0x5A827999;
 
     const u32 f = Ch(*b,*c,*d);
     const u32 temp = rotl(*a,5) + f + *e + k + *getWord(w, t);
 
-    updateVars(a, b, c, d, e, temp);
+    *e = temp;
+    *b = rotl(*b, 30);
 }
 
 inline void r2(u32 *a, u32 *b, u32 *c, u32 *d, u32 *e, u32 *w, u8 const& t){
@@ -162,26 +164,26 @@ void SHA1::process() {
     u32 *a=&var_a, *b=&var_b, *c=&var_c, *d=&var_d, *e=&var_e;
 
     r0(a, b, c, d, e, word, 0);
-    r0(a, b, c, d, e, word, 1);
-    r0(a, b, c, d, e, word, 2);
-    r0(a, b, c, d, e, word, 3);
-    r0(a, b, c, d, e, word, 4);
+    r0(e, a, b, c, d, word, 1);
+    r0(d, e, a, b, c, word, 2);
+    r0(c, d, e, a, b, word, 3);
+    r0(b, c, d, e, a, word, 4);
     r0(a, b, c, d, e, word, 5);
-    r0(a, b, c, d, e, word, 6);
-    r0(a, b, c, d, e, word, 7);
-    r0(a, b, c, d, e, word, 8);
-    r0(a, b, c, d, e, word, 9);
+    r0(e, a, b, c, d, word, 6);
+    r0(d, e, a, b, c, word, 7);
+    r0(c, d, e, a, b, word, 8);
+    r0(b, c, d, e, a, word, 9);
     r0(a, b, c, d, e, word, 10);
-    r0(a, b, c, d, e, word, 11);
-    r0(a, b, c, d, e, word, 12);
-    r0(a, b, c, d, e, word, 13);
-    r0(a, b, c, d, e, word, 14);
+    r0(e, a, b, c, d, word, 11);
+    r0(d, e, a, b, c, word, 12);
+    r0(c, d, e, a, b, word, 13);
+    r0(b, c, d, e, a, word, 14);
     r0(a, b, c, d, e, word, 15);
 
-    r1(a, b, c, d, e, word, 16);
-    r1(a, b, c, d, e, word, 17);
-    r1(a, b, c, d, e, word, 18);
-    r1(a, b, c, d, e, word, 19);
+    r1(e, a, b, c, d, word, 16);
+    r1(d, e, a, b, c, word, 17);
+    r1(c, d, e, a, b, word, 18);
+    r1(b, c, d, e, a, word, 19);
 
     r2(a, b, c, d, e, word, 20);
     r2(a, b, c, d, e, word, 21);
